@@ -66,9 +66,13 @@ export default function RemoveLiquidityPage() {
       position.poolInformation.tokenB.address === tokenBAddress,
   );
 
-  // Get token info
+  // Get token info – fall back to pool position data for custom tokens
   const tokenA = tokenMap[tokenAAddress || ""];
   const tokenB = tokenMap[tokenBAddress || ""];
+  const tokenACode =
+    tokenA?.code ?? poolPosition?.poolInformation.tokenA.symbol ?? "";
+  const tokenBCode =
+    tokenB?.code ?? poolPosition?.poolInformation.tokenB.symbol ?? "";
 
   // Use the pools controller for remove liquidity functionality
   const { handleRemoveLiquidity, isSwapLoading, currentStep, resetSwap } =
@@ -177,6 +181,8 @@ export default function RemoveLiquidityPage() {
       const amountBStroops = Math.floor(parseFloat(amountB) * 10000000);
 
       await handleRemoveLiquidity({
+        assetA: tokenAAddress!,
+        assetB: tokenBAddress!,
         liquidity: BigInt(liquidityToBurn),
         amountA: BigInt(amountAStroops),
         amountB: BigInt(amountBStroops),
@@ -188,6 +194,8 @@ export default function RemoveLiquidityPage() {
       amountB,
       poolPosition,
       handleRemoveLiquidity,
+      tokenAAddress,
+      tokenBAddress,
     ],
   );
 
@@ -327,11 +335,12 @@ export default function RemoveLiquidityPage() {
               <div className="flex items-center gap-3">
                 <TokenIcon
                   src={tokenA?.icon}
-                  alt={tokenA?.code || "Token A"}
+                  alt={tokenACode || "Token A"}
+                  code={tokenACode}
                   className="size-8 rounded-full"
                 />
                 <span className="text-primary font-medium">
-                  {tokenA?.code || ""} {amountA}
+                  {tokenACode} {amountA}
                 </span>
               </div>
             </div>
@@ -339,11 +348,12 @@ export default function RemoveLiquidityPage() {
               <div className="flex items-center gap-3">
                 <TokenIcon
                   src={tokenB?.icon}
-                  alt={tokenB?.code || "Token B"}
+                  alt={tokenBCode || "Token B"}
+                  code={tokenBCode}
                   className="size-8 rounded-full"
                 />
                 <span className="text-primary font-medium">
-                  {tokenB?.code || ""} {amountB}
+                  {tokenBCode} {amountB}
                 </span>
               </div>
             </div>

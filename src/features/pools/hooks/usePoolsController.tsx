@@ -265,24 +265,22 @@ export function usePoolsController({
 
   /**
    * Executes the remove liquidity transaction via the Soroswap SDK API.
+   * Accepts assetA/assetB addresses directly so it works for any token,
+   * including custom tokens not present in the official token list.
    */
   const handleRemoveLiquidity = useCallback(
     async (
-      params: Pick<RemoveLiquidityRequest, "liquidity" | "amountA" | "amountB">,
+      params: Pick<RemoveLiquidityRequest, "liquidity" | "amountA" | "amountB"> & {
+        assetA: string;
+        assetB: string;
+      },
     ) => {
-      if (
-        !TOKEN_A ||
-        !TOKEN_B ||
-        !userAddress ||
-        !TOKEN_A.contract ||
-        !TOKEN_B.contract
-      )
-        return;
+      if (!userAddress) return;
 
       try {
         const removeLiquidityRequest: RemoveLiquidityRequest = {
-          assetA: TOKEN_A.contract,
-          assetB: TOKEN_B.contract,
+          assetA: params.assetA,
+          assetB: params.assetB,
           liquidity: BigInt(params.liquidity),
           amountA: BigInt(params.amountA),
           amountB: BigInt(params.amountB),
@@ -295,8 +293,6 @@ export function usePoolsController({
       }
     },
     [
-      TOKEN_A,
-      TOKEN_B,
       userAddress,
       executeRemoveLiquidity,
       poolsSettings.customSlippage,
