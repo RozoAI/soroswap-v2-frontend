@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const xdr: string = await request.json();
 
     const sendTransactionResponse: SendTransactionResponse =
-      await soroswapClient.send(xdr, false, SOROSWAP.NETWORK);
+      await soroswapClient.send(xdr, SOROSWAP.NETWORK);
 
     return NextResponse.json({
       code: "SEND_TRANSACTION_SUCCESS",
