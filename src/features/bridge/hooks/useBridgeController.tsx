@@ -111,16 +111,11 @@ function bridgeReducer(state: BridgeState, action: BridgeAction): BridgeState {
 
 function useDebounce<T>(value: T, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  const [isDebouncing, setIsDebouncing] = useState<boolean>(false);
 
   useEffect(() => {
-    // Mark as debouncing when value changes
-    setIsDebouncing(true);
-
     // Set up the debounce timer
     const handler = setTimeout(() => {
       setDebouncedValue(value);
-      setIsDebouncing(false);
     }, delay);
 
     // Cleanup function automatically handles timeout clearing
@@ -129,6 +124,9 @@ function useDebounce<T>(value: T, delay: number) {
     };
   }, [value, delay]);
 
+  // Derive the debouncing flag instead of mirroring it in state — the value is
+  // "debouncing" whenever the latest input differs from the committed one.
+  const isDebouncing = debouncedValue !== value;
   return { debouncedValue, isDebouncing };
 }
 
@@ -235,6 +233,19 @@ export function useBridgeController() {
       amount: debouncedAmount,
       type: independentField === "from" ? FeeType.ExactIn : FeeType.ExactOut,
       appId: BRIDGE_APP_ID,
+      // toChain follows the bridge destination: the selected chain when
+      // switching, otherwise Stellar.
+      toChain: fromChain === "stellar"
+        ? (chainToUSDC[destinationChainId]?.chainId ?? baseUSDC.chainId)
+        : rozoStellarUSDC.chainId,
+      // Source/destination pair for the fee route, mirroring createPaymentConfig:
+      // switching = Stellar -> selected chain, otherwise Base -> Stellar.
+      // The bridge only moves USDC, so the token symbols are hardcoded.
+      sourceChainId: fromChain === "stellar" ? rozoStellarUSDC.chainId : baseUSDC.chainId,
+      sourceTokenSymbol: "USDC",
+      destReceiverAddress:
+        (fromChain === "stellar" ? destinationAddress : userAddress) ?? "",
+      destTokenSymbol: "USDC",
     },
     {
       enabled: debouncedAmount > 0,
@@ -615,13 +626,13 @@ export function useBridgeController() {
 
   // Create payment config when validation passes
   useEffect(() => {
-    // Use validation to determine if we should create config
+    // Skip config creation while validation fails. The displayed config is
+    // derived from `validation.canBridge` at the return below, so there's no
+    // need to reset the state here (that would just duplicate the validation).
     if (!validation.canBridge) {
-      console.debug("[Bridge] Cannot bridge, clearing config", {
+      console.debug("[Bridge] Cannot bridge, skipping config creation", {
         reason: validation.disabledReason,
       });
-      setIntentConfig(null);
-      setIsConfigLoading(false);
       return;
     }
 
@@ -661,7 +672,9 @@ export function useBridgeController() {
       try {
         // Withdraw
         if (isTokenSwitched) {
-          const sourceChain = e.chainId ? getChainName(e.chainId) : null;
+          const sourceChain = e.sourceChainId
+            ? getChainName(e.sourceChainId)
+            : null;
           const fromChainName = sourceChain ?? "Stellar";
           const toChainName = normalizeChainName(destinationChainId);
           const sentAmount =
@@ -680,7 +693,9 @@ export function useBridgeController() {
           });
         } else {
           // Deposit
-          const sourceChain = e.chainId ? getChainName(e.chainId) : null;
+          const sourceChain = e.sourceChainId
+            ? getChainName(e.sourceChainId)
+            : null;
           const fromChainName = sourceChain ?? "Any Chains";
           const toChainName = normalizeChainName(destinationChainId);
           const sentAmount =
@@ -733,8 +748,11 @@ export function useBridgeController() {
     // trustline data
     trustlineData,
 
-    // payment config
-    intentConfig,
+    // payment config — `validation.canBridge` acts as the discriminator, so the
+    // exposed config derives from it instead of being reset in an effect. The
+    // loading flag is returned raw: config hiding is handled above, and gating
+    // it on `canBridge` would hide the spinner mid-flight if validation flips.
+    intentConfig: validation.canBridge ? intentConfig : null,
     isConfigLoading,
     getActionButtonDisabled,
 

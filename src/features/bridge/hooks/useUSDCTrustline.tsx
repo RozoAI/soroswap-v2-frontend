@@ -21,6 +21,19 @@ import {
 } from "../utils/bridge";
 import { WalletNetwork } from "@creit.tech/stellar-wallets-kit";
 
+// Disconnected state, derived from `stellarAddress` at the return below so we
+// don't reset the status state in an effect when the wallet disconnects.
+const DISCONNECTED_TRUSTLINE: TrustlineStatus = {
+  exists: false,
+  balance: "0",
+  checking: false,
+};
+const DISCONNECTED_ACCOUNT: AccountStatus = {
+  exists: false,
+  xlmBalance: "0",
+  checking: false,
+};
+
 /**
  * Hook for managing USDC trustline operations
  * @param autoCheck - Whether to automatically check account/trustline when wallet connects (default: true)
@@ -195,22 +208,32 @@ export function useUSDCTrustline(
     }
   }, [kit, stellarAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-check account and trustline when wallet connects (only if autoCheck is enabled)
+  // Auto-check account and trustline when wallet connects (only if autoCheck is enabled).
+  // The await lives in the effect body so state updates happen in an async
+  // callback — a legitimate data load, not a prop-driven state reset.
   useEffect(() => {
-    if (stellarAddress && autoCheck) {
-      checkAccountAndTrustline();
-    } else if (!stellarAddress) {
-      // Reset status when disconnected - show disconnected state, not loading
-      setTrustlineStatus({ exists: false, balance: "0", checking: false });
-      setAccountStatus({ exists: false, xlmBalance: "0", checking: false });
-      setHasCheckedOnce(false);
-    }
+    if (!(stellarAddress && autoCheck)) return;
+    (async () => {
+      await checkAccountAndTrustline();
+    })().catch((error) => {
+      console.error("Failed to auto-check account and trustline:", error);
+    });
   }, [stellarAddress, autoCheck]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The wallet's connection state is the discriminator: when there's no address
+  // the exposed status is the disconnected state, derived rather than reset.
+  const effectiveTrustlineStatus = stellarAddress
+    ? trustlineStatus
+    : DISCONNECTED_TRUSTLINE;
+  const effectiveAccountStatus = stellarAddress
+    ? accountStatus
+    : DISCONNECTED_ACCOUNT;
+  const effectiveHasCheckedOnce = stellarAddress ? hasCheckedOnce : false;
+
   return {
-    trustlineStatus,
-    accountStatus,
-    hasCheckedOnce,
+    trustlineStatus: effectiveTrustlineStatus,
+    accountStatus: effectiveAccountStatus,
+    hasCheckedOnce: effectiveHasCheckedOnce,
     checkAccountAndTrustline,
     refreshBalance,
     createTrustline,
