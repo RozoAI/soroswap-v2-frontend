@@ -626,13 +626,15 @@ export function useBridgeController() {
 
   // Create payment config when validation passes
   useEffect(() => {
-    // Skip config creation while validation fails. The displayed config is
-    // derived from `validation.canBridge` at the return below, so there's no
-    // need to reset the state here (that would just duplicate the validation).
+    // Skip config creation while validation fails. Clear the config built for
+    // the previous inputs so it can't be exposed for a render when validation
+    // flips back to true — the new config is only set after createPaymentConfig
+    // completes, and the displayed config is derived from `validation.canBridge`.
     if (!validation.canBridge) {
-      console.debug("[Bridge] Cannot bridge, skipping config creation", {
+      console.debug("[Bridge] Cannot bridge, clearing config", {
         reason: validation.disabledReason,
       });
+      setIntentConfig(null);
       return;
     }
 

@@ -8,7 +8,7 @@ import {
   Operation,
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { USDC_ASSET_MAINNET, USDC_ASSET_TESTNET } from "../constants/bridge";
 import {
   AccountStatus,
@@ -32,6 +32,19 @@ const DISCONNECTED_ACCOUNT: AccountStatus = {
   exists: false,
   xlmBalance: "0",
   checking: false,
+};
+
+// Checking state shown for a newly connected wallet until its own account and
+// trustline have been verified — prevents exposing a previous wallet's results.
+const CHECKING_TRUSTLINE: TrustlineStatus = {
+  exists: false,
+  balance: "0",
+  checking: true,
+};
+const CHECKING_ACCOUNT: AccountStatus = {
+  exists: false,
+  xlmBalance: "0",
+  checking: true,
 };
 
 /**
@@ -66,11 +79,16 @@ export function useUSDCTrustline(
     string | null
   >(null);
 
+  // Tracks which address the current status state belongs to, so results from a
+  // previous wallet aren't exposed when a different address connects.
+  const checkedAddressRef = useRef<string | null>(null);
+
   // Check both account status and USDC trustline in one request
   const checkAccountAndTrustline = useCallback(async () => {
     if (!stellarAddress) {
       setTrustlineStatus({ exists: false, balance: "0", checking: false });
       setAccountStatus({ exists: false, xlmBalance: "0", checking: false });
+      checkedAddressRef.current = null;
       return;
     }
 
@@ -98,6 +116,7 @@ export function useUSDCTrustline(
       });
 
       setHasCheckedOnce(true);
+      checkedAddressRef.current = stellarAddress;
     } catch (error) {
       console.error("Failed to check account and trustline:", error);
       setTrustlineStatus({
@@ -220,15 +239,27 @@ export function useUSDCTrustline(
     });
   }, [stellarAddress, autoCheck]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // The wallet's connection state is the discriminator: when there's no address
-  // the exposed status is the disconnected state, derived rather than reset.
-  const effectiveTrustlineStatus = stellarAddress
-    ? trustlineStatus
-    : DISCONNECTED_TRUSTLINE;
-  const effectiveAccountStatus = stellarAddress
-    ? accountStatus
-    : DISCONNECTED_ACCOUNT;
-  const effectiveHasCheckedOnce = stellarAddress ? hasCheckedOnce : false;
+  // The status state is only valid for the address it was last checked against.
+  // When disconnected, expose the disconnected state (derived, not reset).
+  // When connected but the status belongs to a different address, expose a
+  // checking state until the current address has been verified.
+  const statusBelongsToCurrentAddress =
+    stellarAddress !== null && checkedAddressRef.current === stellarAddress;
+  const effectiveTrustlineStatus = !stellarAddress
+    ? DISCONNECTED_TRUSTLINE
+    : statusBelongsToCurrentAddress
+      ? trustlineStatus
+      : CHECKING_TRUSTLINE;
+  const effectiveAccountStatus = !stellarAddress
+    ? DISCONNECTED_ACCOUNT
+    : statusBelongsToCurrentAddress
+      ? accountStatus
+      : CHECKING_ACCOUNT;
+  const effectiveHasCheckedOnce = !stellarAddress
+    ? false
+    : statusBelongsToCurrentAddress
+      ? hasCheckedOnce
+      : false;
 
   return {
     trustlineStatus: effectiveTrustlineStatus,
