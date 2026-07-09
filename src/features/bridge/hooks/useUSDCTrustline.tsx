@@ -8,7 +8,7 @@ import {
   Operation,
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { USDC_ASSET_MAINNET, USDC_ASSET_TESTNET } from "../constants/bridge";
 import {
   AccountStatus,
@@ -20,6 +20,32 @@ import {
   fetchUSDCBalance,
 } from "../utils/bridge";
 import { WalletNetwork } from "@creit.tech/stellar-wallets-kit";
+
+// Disconnected state, derived from `stellarAddress` at the return below so we
+// don't reset the status state in an effect when the wallet disconnects.
+const DISCONNECTED_TRUSTLINE: TrustlineStatus = {
+  exists: false,
+  balance: "0",
+  checking: false,
+};
+const DISCONNECTED_ACCOUNT: AccountStatus = {
+  exists: false,
+  xlmBalance: "0",
+  checking: false,
+};
+
+// Checking state shown for a newly connected wallet until its own account and
+// trustline have been verified — prevents exposing a previous wallet's results.
+const CHECKING_TRUSTLINE: TrustlineStatus = {
+  exists: false,
+  balance: "0",
+  checking: true,
+};
+const CHECKING_ACCOUNT: AccountStatus = {
+  exists: false,
+  xlmBalance: "0",
+  checking: true,
+};
 
 /**
  * Hook for managing USDC trustline operations
@@ -53,11 +79,16 @@ export function useUSDCTrustline(
     string | null
   >(null);
 
+  // Tracks which address the current status state belongs to, so results from a
+  // previous wallet aren't exposed when a different address connects.
+  const checkedAddressRef = useRef<string | null>(null);
+
   // Check both account status and USDC trustline in one request
   const checkAccountAndTrustline = useCallback(async () => {
     if (!stellarAddress) {
       setTrustlineStatus({ exists: false, balance: "0", checking: false });
       setAccountStatus({ exists: false, xlmBalance: "0", checking: false });
+      checkedAddressRef.current = null;
       return;
     }
 
@@ -85,6 +116,7 @@ export function useUSDCTrustline(
       });
 
       setHasCheckedOnce(true);
+      checkedAddressRef.current = stellarAddress;
     } catch (error) {
       console.error("Failed to check account and trustline:", error);
       setTrustlineStatus({
@@ -195,22 +227,44 @@ export function useUSDCTrustline(
     }
   }, [kit, stellarAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-check account and trustline when wallet connects (only if autoCheck is enabled)
+  // Auto-check account and trustline when wallet connects (only if autoCheck is enabled).
+  // The await lives in the effect body so state updates happen in an async
+  // callback — a legitimate data load, not a prop-driven state reset.
   useEffect(() => {
-    if (stellarAddress && autoCheck) {
-      checkAccountAndTrustline();
-    } else if (!stellarAddress) {
-      // Reset status when disconnected - show disconnected state, not loading
-      setTrustlineStatus({ exists: false, balance: "0", checking: false });
-      setAccountStatus({ exists: false, xlmBalance: "0", checking: false });
-      setHasCheckedOnce(false);
-    }
+    if (!(stellarAddress && autoCheck)) return;
+    (async () => {
+      await checkAccountAndTrustline();
+    })().catch((error) => {
+      console.error("Failed to auto-check account and trustline:", error);
+    });
   }, [stellarAddress, autoCheck]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The status state is only valid for the address it was last checked against.
+  // When disconnected, expose the disconnected state (derived, not reset).
+  // When connected but the status belongs to a different address, expose a
+  // checking state until the current address has been verified.
+  const statusBelongsToCurrentAddress =
+    stellarAddress !== null && checkedAddressRef.current === stellarAddress;
+  const effectiveTrustlineStatus = !stellarAddress
+    ? DISCONNECTED_TRUSTLINE
+    : statusBelongsToCurrentAddress
+      ? trustlineStatus
+      : CHECKING_TRUSTLINE;
+  const effectiveAccountStatus = !stellarAddress
+    ? DISCONNECTED_ACCOUNT
+    : statusBelongsToCurrentAddress
+      ? accountStatus
+      : CHECKING_ACCOUNT;
+  const effectiveHasCheckedOnce = !stellarAddress
+    ? false
+    : statusBelongsToCurrentAddress
+      ? hasCheckedOnce
+      : false;
+
   return {
-    trustlineStatus,
-    accountStatus,
-    hasCheckedOnce,
+    trustlineStatus: effectiveTrustlineStatus,
+    accountStatus: effectiveAccountStatus,
+    hasCheckedOnce: effectiveHasCheckedOnce,
     checkAccountAndTrustline,
     refreshBalance,
     createTrustline,
