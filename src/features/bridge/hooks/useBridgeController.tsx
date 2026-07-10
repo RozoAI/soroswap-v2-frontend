@@ -126,7 +126,9 @@ function useDebounce<T>(value: T, delay: number) {
 
   // Derive the debouncing flag instead of mirroring it in state — the value is
   // "debouncing" whenever the latest input differs from the committed one.
-  const isDebouncing = debouncedValue !== value;
+  // Object.is so equal-but-NaN values (e.g. NaN from parseFloat) settle as not
+  // debouncing instead of flipping forever.
+  const isDebouncing = !Object.is(debouncedValue, value);
   return { debouncedValue, isDebouncing };
 }
 

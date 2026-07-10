@@ -79,12 +79,16 @@ export const BridgeHistory = ({
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === SOROSWAP_BRIDGE_HISTORY_STORAGE_KEY) {
-        loadHistory();
+        loadHistory().catch((error) => {
+          console.error("Failed to load bridge history:", error);
+        });
       }
     };
 
     const handleCustomEvent = () => {
-      loadHistory();
+      loadHistory().catch((error) => {
+        console.error("Failed to load bridge history:", error);
+      });
     };
 
     window.addEventListener("storage", handleStorageChange);

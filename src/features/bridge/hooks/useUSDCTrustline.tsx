@@ -82,6 +82,10 @@ export function useUSDCTrustline(
   // Tracks which address the current status state belongs to, so results from a
   // previous wallet aren't exposed when a different address connects.
   const checkedAddressRef = useRef<string | null>(null);
+  // Tracks the address of an in-flight check so the concurrency guard is
+  // address-aware: a switch to a new wallet starts a fresh lookup even if a
+  // previous address's request is still running.
+  const checkingAddressRef = useRef<string | null>(null);
 
   // Check both account status and USDC trustline in one request
   const checkAccountAndTrustline = useCallback(async () => {
@@ -92,11 +96,13 @@ export function useUSDCTrustline(
       return;
     }
 
-    // Avoid concurrent checks that could cause UI flicker
-    if (trustlineStatus.checking || accountStatus.checking) {
+    // Avoid concurrent checks for the SAME address (prevents flicker). A switch
+    // to a different address must always be allowed to start its own lookup.
+    if (checkingAddressRef.current === stellarAddress) {
       return;
     }
 
+    checkingAddressRef.current = stellarAddress;
     setTrustlineStatus((prev) => ({ ...prev, checking: true }));
     setAccountStatus((prev) => ({ ...prev, checking: true }));
 
@@ -116,7 +122,11 @@ export function useUSDCTrustline(
       });
 
       setHasCheckedOnce(true);
-      checkedAddressRef.current = stellarAddress;
+      // Only record the result if this is still the active check for this
+      // address — a newer check for a different address may have started.
+      if (checkingAddressRef.current === stellarAddress) {
+        checkedAddressRef.current = stellarAddress;
+      }
     } catch (error) {
       console.error("Failed to check account and trustline:", error);
       setTrustlineStatus({
@@ -130,8 +140,11 @@ export function useUSDCTrustline(
         checking: false,
       });
       setHasCheckedOnce(true);
+    } finally {
+      if (checkingAddressRef.current === stellarAddress) {
+        checkingAddressRef.current = null;
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stellarAddress]);
 
   // Refresh only the USDC balance without checking account status
