@@ -94,7 +94,15 @@ export const useGetFee = (
       params.destTokenSymbol,
     ],
     queryFn: () => getFeeRequest(params),
-    enabled: (options?.enabled ?? true) && params.amount > 0,
+    // Only fire once the routing inputs the SDK needs are present, not just a
+    // positive amount — an empty destReceiverAddress or missing chain ids would
+    // otherwise trigger a doomed request on every keystroke.
+    enabled:
+      (options?.enabled ?? true) &&
+      params.amount > 0 &&
+      params.toChain > 0 &&
+      params.sourceChainId > 0 &&
+      !!params.destReceiverAddress,
     refetchInterval: options?.refetchInterval,
     staleTime: 30000, // 30 seconds
     retry: false, // Don't retry on error
