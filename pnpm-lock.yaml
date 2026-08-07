@@ -15,11 +15,11 @@ importers:
         specifier: 0.3.0-alpha.1
         version: 0.3.0-alpha.1
       '@rozoai/intent-common':
-        specifier: 0.1.21
-        version: 0.1.21(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
+        specifier: 0.1.26
+        version: 0.1.26(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@rozoai/intent-pay':
-        specifier: 0.1.34
-        version: 0.1.34(d990a992352e99d7b2389237b3e34b2b)
+        specifier: 0.1.39
+        version: 0.1.39(d990a992352e99d7b2389237b3e34b2b)
       '@soroswap/sdk':
         specifier: 0.4.0
         version: 0.4.0
@@ -1162,11 +1162,11 @@ packages:
       rollup:
         optional: true
 
-  '@rozoai/intent-common@0.1.21':
-    resolution: {integrity: sha512-9M8JaT7qMatpCuber07+K7FhOFmzc9qGcgFh7RYkyOpz9z9UoqVDLmuyye9ogwDbNU2COU/As6WO1t42Nv1DSw==}
+  '@rozoai/intent-common@0.1.26':
+    resolution: {integrity: sha512-vnIGZK8KnFmiyACV856+Ac8yVWy3IDxKGzs1hB0p73bUOY7frFrvcndQPdqXEzEFWSVkmGdtqQvYtTj0b6bGNw==}
 
-  '@rozoai/intent-pay@0.1.34':
-    resolution: {integrity: sha512-DP8hQHHFZbrGMTZsx+TxTgPim03ZS1FN87jKL0ZwQZVD4GUSl37a03YEXDZErwQ8gjeoNE+3GZy+HbVJpf5Vog==}
+  '@rozoai/intent-pay@0.1.39':
+    resolution: {integrity: sha512-BovHk0fot/d7kVvVRoAOmKkyiYgD0qob5xEHi7L0duIvQx0cuFJJXRaB3DYat7ClU4Oijvuj7P2Hsb9WHAxN/Q==}
     engines: {node: '>=12.4'}
     peerDependencies:
       '@creit.tech/stellar-wallets-kit': ^1.9.5
@@ -1942,6 +1942,7 @@ packages:
   '@stellar/stellar-base@13.1.0':
     resolution: {integrity: sha512-90EArG+eCCEzDGj3OJNoCtwpWDwxjv+rs/RNPhvg4bulpjN/CSRj+Ys/SalRcfM4/WRC5/qAfjzmJBAuquWhkA==}
     engines: {node: '>=18.0.0'}
+    deprecated: This package is now rolled into @stellar/stellar-sdk. Please use @stellar/stellar-sdk to continue receiving updates and support.
 
   '@stellar/stellar-base@14.0.4':
     resolution: {integrity: sha512-UbNW6zbdOBXJwLAV2mMak0bIC9nw3IZVlQXkv2w2dk1jgCbJjy3oRVC943zeGE5JAm0Z9PHxrIjmkpGhayY7kw==}
@@ -5974,6 +5975,7 @@ packages:
 
   uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@9.0.1:
@@ -6519,6 +6521,7 @@ snapshots:
       - fastestsmallesttextencoderdecoder
       - immer
       - react
+      - supports-color
       - typescript
       - use-sync-external-store
       - utf-8-validate
@@ -6532,8 +6535,8 @@ snapshots:
       '@solana/kit': 3.0.3(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(ws@8.18.3(bufferutil@4.1.0)(utf-8-validate@5.0.10))
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       abitype: 1.0.6(typescript@5.9.3)(zod@3.25.76)
-      axios: 1.13.2
-      axios-retry: 4.5.0(axios@1.13.2)
+      axios: 1.18.1
+      axios-retry: 4.5.0(axios@1.18.1)
       jose: 6.1.3
       md5: 2.3.0
       uncrypto: 0.1.3
@@ -6544,6 +6547,7 @@ snapshots:
       - debug
       - encoding
       - fastestsmallesttextencoderdecoder
+      - supports-color
       - typescript
       - utf-8-validate
       - ws
@@ -7792,6 +7796,7 @@ snapshots:
       - immer
       - ioredis
       - react
+      - supports-color
       - typescript
       - uploadthing
       - use-sync-external-store
@@ -7878,6 +7883,7 @@ snapshots:
       - immer
       - ioredis
       - react
+      - supports-color
       - typescript
       - uploadthing
       - use-sync-external-store
@@ -8036,6 +8042,7 @@ snapshots:
       - immer
       - ioredis
       - react
+      - supports-color
       - typescript
       - uploadthing
       - use-sync-external-store
@@ -8151,6 +8158,7 @@ snapshots:
       - immer
       - ioredis
       - react
+      - supports-color
       - typescript
       - uploadthing
       - use-sync-external-store
@@ -8177,7 +8185,7 @@ snapshots:
       estree-walker: 2.0.2
       picomatch: 4.0.3
 
-  '@rozoai/intent-common@0.1.21(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)':
+  '@rozoai/intent-common@0.1.26(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@scure/base': 1.2.6
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
@@ -8192,13 +8200,13 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@rozoai/intent-pay@0.1.34(d990a992352e99d7b2389237b3e34b2b)':
+  '@rozoai/intent-pay@0.1.39(d990a992352e99d7b2389237b3e34b2b)':
     dependencies:
       '@creit.tech/stellar-wallets-kit': 1.9.5(0bf60eba65f72a2bc752b927274fc22b)
       '@reown/appkit': 1.8.15(@react-native-async-storage/async-storage@1.24.0(react-native@0.82.1(@babel/core@7.28.5)(@types/react@19.2.7)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10)))(@types/react@19.2.7)(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.3))(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.1.0)(utf-8-validate@5.0.10))(zod@3.25.76)
       '@rollup/plugin-image': 3.0.3
       '@rollup/plugin-typescript': 12.3.0(tslib@2.8.1)(typescript@5.9.3)
-      '@rozoai/intent-common': 0.1.21(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
+      '@rozoai/intent-common': 0.1.26(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@solana/spl-memo': 0.2.5(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))
       '@solana/spl-token': 0.4.14(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@solana/wallet-adapter-base': 0.9.27(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))
@@ -8209,6 +8217,7 @@ snapshots:
       '@trpc/client': 11.8.1(@trpc/server@11.8.1(typescript@5.9.3))(typescript@5.9.3)
       '@trpc/server': 11.8.1(typescript@5.9.3)
       '@walletconnect/sign-client': 2.23.1(@react-native-async-storage/async-storage@1.24.0(react-native@0.82.1(@babel/core@7.28.5)(@types/react@19.2.7)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10)))(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@walletconnect/universal-provider': 2.23.0(@react-native-async-storage/async-storage@1.24.0(react-native@0.82.1(@babel/core@7.28.5)(@types/react@19.2.7)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10)))(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       '@worldcoin/minikit-js': 1.9.9(@types/react@19.2.7)(react@19.2.3)(typescript@5.9.3)(viem@2.43.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
       bs58: 6.0.0
       buffer: 6.0.3
@@ -8307,7 +8316,7 @@ snapshots:
 
   '@scure/bip32@1.7.0':
     dependencies:
-      '@noble/curves': 1.9.1
+      '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
 
@@ -9527,7 +9536,7 @@ snapshots:
   '@stellar/stellar-sdk@13.3.0':
     dependencies:
       '@stellar/stellar-base': 13.1.0
-      axios: 1.13.2
+      axios: 1.18.1
       bignumber.js: 9.3.1
       eventsource: 2.0.2
       feaxios: 0.0.23
@@ -9537,6 +9546,7 @@ snapshots:
     transitivePeerDependencies:
       - bare-url
       - debug
+      - supports-color
 
   '@stellar/stellar-sdk@14.1.1':
     dependencies:
@@ -9688,6 +9698,7 @@ snapshots:
       - expo-constants
       - expo-localization
       - react-native
+      - supports-color
       - utf-8-validate
 
   '@trezor/blockchain-link@2.5.2(@solana/sysvars@3.0.3(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.82.1(@babel/core@7.28.5)(@types/react@19.2.7)(bufferutil@4.1.0)(react@19.2.3)(utf-8-validate@5.0.10))(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.1.0)(utf-8-validate@5.0.10))':
@@ -10674,7 +10685,7 @@ snapshots:
 
   '@walletconnect/relay-api@1.0.11':
     dependencies:
-      '@walletconnect/jsonrpc-types': 1.0.3
+      '@walletconnect/jsonrpc-types': 1.0.4
 
   '@walletconnect/relay-auth@1.1.0':
     dependencies:
@@ -11573,9 +11584,9 @@ snapshots:
 
   axe-core@4.11.0: {}
 
-  axios-retry@4.5.0(axios@1.13.2):
+  axios-retry@4.5.0(axios@1.18.1):
     dependencies:
-      axios: 1.13.2
+      axios: 1.18.1
       is-retry-allowed: 2.2.0
 
   axios@1.13.2:
