@@ -11,10 +11,10 @@ export interface GetFeeParams {
   toChain: number;
   /** Source chain id (where the user sends from). */
   sourceChainId: number;
-  sourceTokenSymbol: string;
+  preferredTokenAddress: string;
   /** Destination wallet address (receiver on the destination chain). */
   destReceiverAddress: string;
-  destTokenSymbol: string;
+  toToken: string;
 }
 
 export interface GetFeeResponse {
@@ -38,13 +38,13 @@ export interface GetFeeError {
 const getFeeRequest = async (params: GetFeeParams): Promise<GetFeeResponse> => {
   const res = await getFee({
     appId: params.appId ?? BRIDGE_APP_ID,
-    type: params.type ?? FeeType.ExactOut,
-    sourceChainId: String(params.sourceChainId),
-    sourceTokenSymbol: params.sourceTokenSymbol,
-    amount: String(params.amount),
-    destChainId: String(params.toChain),
-    destReceiverAddress: params.destReceiverAddress,
-    destTokenSymbol: params.destTokenSymbol,
+    feeType: params.type ?? FeeType.ExactOut,
+    preferredChain: params.sourceChainId,
+    preferredTokenAddress: params.preferredTokenAddress,
+    toUnits: String(params.amount),
+    toChain: params.toChain,
+    toAddress: params.destReceiverAddress,
+    toToken: params.toToken,
   });
 
   if (res.error || !res.data) {
@@ -89,9 +89,9 @@ export const useGetFee = (
       params.type,
       params.toChain,
       params.sourceChainId,
-      params.sourceTokenSymbol,
+      params.preferredTokenAddress,
       params.destReceiverAddress,
-      params.destTokenSymbol,
+      params.toToken,
     ],
     queryFn: () => getFeeRequest(params),
     // Only fire once the routing inputs the SDK needs are present, not just a

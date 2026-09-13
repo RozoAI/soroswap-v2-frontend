@@ -2,7 +2,7 @@
 
 > **Living document.** Read this before modifying the module. Update it in the same change whenever the module's behavior, endpoints, files, or dependencies change.
 
-**Source:** `src/features/bridge/` · **Last verified:** 2026-09-04
+**Source:** `src/features/bridge/` · **Last verified:** 2026-09-12
 
 ## Purpose
 
@@ -32,7 +32,7 @@ No barrel export. `src/app/bridge/page.tsx` imports `RozoProvider`, `BridgeLayou
 
 - **`useBridgeController()`** (`hooks/useBridgeController.tsx:188`) owns a reducer with `TYPE_INPUT`, `SWITCH_CHAINS`, `SET_DESTINATION_ADDRESS`, `SET_DESTINATION_ADDRESS_ERROR`, `SET_DESTINATION_CHAIN` (`:68`). Direction is expressed as `isTokenSwitched = fromChain === "stellar"` (`:298`); the initial state is Base to Stellar (`:48-56`).
 - **`createPaymentConfig`** (`hooks/useBridgeController.tsx:433`) assembles the `IntentPayConfig` (`:550-574`) and hands it to `resetPayment` from `useRozoPayUI`. When bridging out of Stellar it targets the selected chain's USDC and the typed destination address; otherwise it targets `rozoStellarUSDC` and the connected Stellar address. `paymentOptions` is `[Stellar]` when leaving Stellar and `[Ethereum, Solana]` when arriving (`:563-565`).
-- **`useGetFee(params, options)`** (`hooks/useGetFee.ts:76`) calls `getFee` from `@rozoai/intent-common` and normalizes the response. `enabled` deliberately requires a positive amount **and** a destination address **and** both chain ids, so a doomed request is not fired on every keystroke (`:100-105`). `staleTime` is 30 s and retries are off.
+- **`useGetFee(params, options)`** (`hooks/useGetFee.ts:76`) calls `getFee` from `@rozoai/intent-common` and normalizes the response. `enabled` deliberately requires a positive amount **and** a destination address **and** both chain ids, so a doomed request is not fired on every keystroke (`:100-105`). `staleTime` is 30 s and retries are off. Uses `preferredTokenAddress` for source token and `toToken` for destination token (`:14`, `:17`).
 - **fee validity gate** (`hooks/useBridgeController.tsx:264-268`) only trusts `feeData` when `feeData.amount === debouncedAmount === currentAmount`. This is what prevents a stale quote from a previous keystroke being shown against a newer amount. `getFeeRequest` mirrors the user's independent field into `amount` precisely so this comparison holds for both `ExactIn` and `ExactOut` (`hooks/useGetFee.ts:59-62`).
 - **`useUSDCTrustline(autoCheck)`** (`hooks/useUSDCTrustline.tsx:54`) tracks `checkedAddressRef` and `checkingAddressRef` so a wallet switch never shows the previous wallet's trustline state. The returned status is derived at the end (`:259-275`) rather than reset in an effect.
 - **`createTrustline`** (`hooks/useUSDCTrustline.tsx:183`) builds a `changeTrust` operation, signs it through `UserContext`, and submits it via `POST /api/send`.
@@ -56,7 +56,7 @@ No barrel export. `src/app/bridge/page.tsx` imports `RozoProvider`, `BridgeLayou
 - **Bridge history lives only in `localStorage`**, under `soroswap_bridge_history` keyed by wallet address (`utils/history.ts:3`). Clearing site data loses it; it is not recoverable from any backend.
 - `RozoProvider` renders a loader until a `setTimeout(0)` has elapsed and the wallet kit exists (`providers/RozoProvider.tsx:35-47`). This defers `createConfig` off the SSR path because wallet connectors touch `window` and `localStorage`. Do not hoist the config to module scope.
 - `useUSDCTrustline` is called with `autoCheck: false` from the controller (`hooks/useBridgeController.tsx:210`) but defaults to `true`; other callers get automatic checking.
-- The bridge only ever moves USDC. Token symbols are hardcoded to `"USDC"` in the fee request (`hooks/useBridgeController.tsx:247`, `:250`).
+- The bridge only ever moves USDC. Token addresses are passed directly from `rozoStellarUSDC.token` and `baseUSDC.token` in the fee request (`hooks/useBridgeController.tsx:247`, `:250`).
 - The page banner says Beta, not Alpha (`src/app/bridge/page.tsx:13`).
 
 ## Testing

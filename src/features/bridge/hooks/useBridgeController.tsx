@@ -242,12 +242,14 @@ export function useBridgeController() {
         : rozoStellarUSDC.chainId,
       // Source/destination pair for the fee route, mirroring createPaymentConfig:
       // switching = Stellar -> selected chain, otherwise Base -> Stellar.
-      // The bridge only moves USDC, so the token symbols are hardcoded.
+      // The bridge only moves USDC, so the token addresses are used directly.
       sourceChainId: fromChain === "stellar" ? rozoStellarUSDC.chainId : baseUSDC.chainId,
-      sourceTokenSymbol: "USDC",
+      preferredTokenAddress: fromChain === "stellar" ? rozoStellarUSDC.token : baseUSDC.token,
       destReceiverAddress:
         (fromChain === "stellar" ? destinationAddress : userAddress) ?? "",
-      destTokenSymbol: "USDC",
+      toToken: fromChain === "stellar"
+        ? (chainToUSDC[destinationChainId]?.token ?? baseUSDC.token)
+        : rozoStellarUSDC.token,
     },
     {
       enabled: debouncedAmount > 0,
