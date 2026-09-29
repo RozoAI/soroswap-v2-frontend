@@ -1,6 +1,3 @@
-overrides:
-  "@ledgerhq/devices": "8.4.4"
-
 allowBuilds:
   "@reown/appkit": true
   bigint-buffer: true
