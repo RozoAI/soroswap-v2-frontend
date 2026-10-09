@@ -13,4 +13,4 @@ allowBuilds:
   usb: true
   utf-8-validate: true
 minimumReleaseAgeExclude:
-  - "@rozoai/intent-pay@0.1.51"
+  - "@rozoai/intent-pay@0.1.61"
