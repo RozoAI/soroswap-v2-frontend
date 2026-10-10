@@ -17,7 +17,7 @@
     "@rozoai/intent-common": "0.1.43",
     "@rozoai/intent-pay": "0.1.61",
     "@soroswap/sdk": "0.5.0",
-    "@stellar/stellar-sdk": "14.1.1",
+    "@stellar/stellar-sdk": "14.6.1",
     "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
@@ -31,6 +31,7 @@
     "react-tooltip": "^5.30.0",
     "swr": "^2.3.8",
     "tailwind-merge": "^3.4.0",
+    "viem": "2.52.0",
     "zod": "^3.25.76",
     "zustand": "^5.0.9"
   },
